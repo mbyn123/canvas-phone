@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+  <!--设置画板的尺寸与当前使用的设备一致-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no,maximum-scale=1.0,minimun-scale=1.0">
+  <title></title>
+  <script src="//at.alicdn.com/t/font_1178174_2nq9txu82mk.js"></script>
+	<style>
+.icon {
+  width: 1em; height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+
+#canvas{
+ display: block;
+ position: fixed;
+ top:0;
+ left:0;
+ }
+
+
+*{
+  margin:0px;
+  padding:0px;
+}
+
+#actions{
+  position:fixed;
+  top:0px;
+  left:0px;
+}
+
+#actions svg{
+  width:1.5em;
+  height:1.5em;
+  margin: 10px;
+  transition:all 0.3s
+}
+
+.active{
+  fill:red;
+  transform:scale(1.2);
+}
+ul li{list-style: none;}
+
+.colors{
+   position: fixed;
+   top:50px;
+   left:8px;
+   }
+.colors li{
+   width:20px;
+   height:20px;
+   border:1px solid none;
+   margin:10px 0 10px 0; 
+   border-radius: 50%;
+   transition: all 0.3s;
+   }
+li.red{background: red;}
+li.green{background: green;}
+li.blue{background: blue}
+li.black{background: black}
+li.actives{
+  box-shadow: 0 0 0 3px rgb(241, 229, 229);
+  transform: scale(1.2);
+ }
+.sizes{
+  position: fixed;
+  top:10px;
+  right:10px;
+}
+ .thin{
+  border-bottom:5px solid black;
+  width:20px;
+  margin:20px 0;
+        }
+
+ .thick{
+  border-bottom:10px solid black;
+  width:20px;
+        }      
+.activess{
+  transform: scale(1.3);
+  transition:all 0.3s; 
+
+}           
+		</style>
+</head>
+<body>
+	<canvas id="canvas" width=500 height=500>
+	</canvas>
+  <div id="actions">
+      <svg class="active icon" id="pen" >
+          <use xlink:href="#icon-pen1"></use>
+      </svg>
+      <svg class="icon" id="eraser" >
+          <use xlink:href="#icon-eraser1"></use>
+      </svg>
+      <svg class="icon" id="clear" >
+          <use xlink:href="#icon-clear"></use>
+      </svg>
+      <svg class="icon" id="download" >
+          <use xlink:href="#icon-Save"></use>
+      </svg>
+  </div>
+  <ul class="colors">
+    <li id="black" class="black actives"></li>
+    <li id="red" class="red"></li>
+    <li id="green" class="green"></li>
+    <li id="blue" class="blue"></li>
+  </ul>
+  <ul class="sizes">
+    <li id="thin" class="thin activess"></li>
+    <li id="thick" class="thick"></li>
+  </ul>
+<script>
+var canvas=document.getElementById('canvas');
+//设置画板大小在显示的屏幕中自适应
+  var pagewidth=document.documentElement.clientWidth//获取当前屏幕的显示宽度
+  var pageheight=document.documentElement.clientHeight//获取当前屏幕的显示高度
+	canvas.width=pagewidth//将画板的宽度与获取的屏幕宽度绑定
+	canvas.height=pageheight//将画板的高度与获取的屏幕宽度绑定
+window.onresize=function(){//将此作用作用到全局
+  var pagewidth=document.documentElement.clientWidth
+  var pageheight=document.documentElement.clientHeight
+	canvas.width=pagewidth
+	canvas.height=pageheight
+}
+var context=canvas.getContext('2d');
+ lineWidth=5
+//特性检测
+if(document.body.ontouchstart!==undefined){//判定当前设备是否支持touch触摸事件
+//触屏设备
+var using=false
+var lastPoint={x:undefined,y:undefined}//设置线的起点位置
+canvas.ontouchstart=function(a){
+  console.log(a)
+  var x=a.touches[0].clientX
+	var y=a.touches[0].clientY
+    if(eraserEnabled){
+      using=true
+      context.clearRect(x,y,30,30)//清除
+    }else{
+       using=true
+       lastPoint={x:x,y:y}//获取线的起点位置
+	   drawCircle(x,y,0)
+    }
+}
+canvas.ontouchmove=function(a){
+  var x=a.touches[0].clientX
+	var y=a.touches[0].clientY
+  if(eraserEnabled){
+    if(using){
+      context.clearRect(x,y,30,30)
+    }
+    
+  }else{
+     if(using){
+       var newPoint={x:x,y:y}//获取线的结束位置
+	     drawCircle(x,y,0)
+       drawline(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y)//表示绘画路径 线的中起点和终点的值
+       lastPoint=newPoint//将新的的起点和终点联系起来，画线
+     }
+  }
+}
+canvas.ontouchend=function(a){
+  using=false
+}
+//绘制圆形
+function drawCircle(x,y,radius){//封装绘画圆形的函数
+   context.beginPath();
+   context.arc(x,y,radius,0,Math.PI*2)
+   context.fill()                
+   }
+//绘画路径 线
+function drawline(x1,y1,x2,y2){//封装画线的函数
+//  context.beginPath();
+  context.moveTo(x1,y1)//起点
+  context.lineWidth=lineWidth
+  context.lineTo(x2,y2)//终点
+  context.stroke()
+  context.closePath()
+}
+
+//点击橡皮檫
+var eraserEnabled=false 
+  eraser.onclick=function(){
+    eraserEnabled = true
+    eraser.classList.add('active')
+    pen.classList.remove('active')
+}
+ //点击画笔
+  pen.onclick=function(){
+    eraserEnabled = false
+    pen.classList.add('active')
+    eraser.classList.remove('active')
+  }
+
+//点击选择颜色
+red.onclick=function(){
+  context.strokeStyle="red"
+  red.classList.add('actives')
+  green.classList.remove('actives')
+  blue.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+green.onclick=function(){
+  context.strokeStyle="green"
+  green.classList.add('actives')
+  red.classList.remove('actives')
+  blue.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+blue.onclick=function(){
+  context.strokeStyle="blue"
+  blue.classList.add('actives')
+  red.classList.remove('actives')
+  green.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+black.onclick=function(){
+  context.strokeStyle="black"
+  black.classList.add('actives')
+  red.classList.remove('actives')
+  green.classList.remove('actives')
+  blue.classList.remove('actives')
+}
+ //选择线的宽度
+thin.onclick=function(){
+ lineWidth=5
+ thin.classList.add('activess')
+ thick.classList.remove('activess')
+}
+thick.onclick=function(){
+lineWidth=10
+thick.classList.add('activess')
+thin.classList.remove('activess')
+}
+//清除所有
+clear.onclick=function(){
+  clear.classList.add('activess')
+  context.clearRect(0,0,canvas.width,canvas.height)
+  setTimeout(() => {
+    clear.classList.remove('activess')
+  },200);
+}
+//保存图片
+download.onclick=function(){
+  download.classList.add('activess')
+  setTimeout(() => {
+    download.classList.remove('activess')
+  },200);
+  var url=canvas.toDataURL("image/png")
+  console.log(url)
+  var a=document.createElement('a')
+  document.body.appendChild(a)
+  a.href=url
+  a.download='保存的图片'
+  a.target='-blank'
+  a.click()
+}
+
+}else{
+  //非触屏设备
+var using=false
+var lastPoint={x:undefined,y:undefined}//设置线的起点位置
+//鼠标点击
+canvas.onmousedown=function(a){
+	var x=a.clientX
+	var y=a.clientY
+    if(eraserEnabled){
+      using=true
+      context.clearRect(x,y,30,30)//清除
+    }else{
+       using=true
+       lastPoint={x:x,y:y}//获取线的起点位置
+	   drawCircle(x,y,0)
+    }
+}
+//鼠标移动
+canvas.onmousemove=function(a){
+    var x=a.clientX
+	var y=a.clientY
+  if(eraserEnabled){
+    if(using){
+      context.clearRect(x,y,30,30)
+    }
+    
+  }else{
+     if(using){
+       var newPoint={x:x,y:y}//获取线的结束位置
+	   drawCircle(x,y,0)
+       drawline(lastPoint.x,lastPoint.y,newPoint.x,newPoint.y)//表示绘画路径 线的中起点和终点的值
+       lastPoint=newPoint//将新的的起点和终点联系起来，画线
+     }
+  }
+}
+//鼠标松开
+canvas.onmouseup=function(a){
+    using=false
+}       
+//绘制圆形
+function drawCircle(x,y,radius){//封装绘画圆形的函数
+   context.beginPath();
+   context.arc(x,y,radius,0,Math.PI*2)
+   context.fill()                
+   }
+//绘画路径 线
+function drawline(x1,y1,x2,y2){//封装画线的函数
+//  context.beginPath();
+  context.moveTo(x1,y1)//起点
+  context.lineWidth=lineWidth
+  context.lineTo(x2,y2)//终点
+  context.stroke()
+  context.closePath()
+}
+
+//点击橡皮檫
+var eraserEnabled=false 
+  eraser.onclick=function(){
+    eraserEnabled = true
+    eraser.classList.add('active')
+    pen.classList.remove('active')
+}
+ //点击画笔
+  pen.onclick=function(){
+    eraserEnabled = false
+    pen.classList.add('active')
+    eraser.classList.remove('active')
+  }
+
+  //点击选择颜色
+red.onclick=function(){
+  context.strokeStyle="red"
+  red.classList.add('actives')
+  green.classList.remove('actives')
+  blue.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+green.onclick=function(){
+  context.strokeStyle="green"
+  green.classList.add('actives')
+  red.classList.remove('actives')
+  blue.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+blue.onclick=function(){
+  context.strokeStyle="blue"
+  blue.classList.add('actives')
+  red.classList.remove('actives')
+  green.classList.remove('actives')
+  black.classList.remove('actives')
+}
+
+black.onclick=function(){
+  context.strokeStyle="black"
+  black.classList.add('actives')
+  red.classList.remove('actives')
+  green.classList.remove('actives')
+  blue.classList.remove('actives')
+}
+ //选择线的宽度
+ thin.onclick=function(){
+ lineWidth=5
+ thin.classList.add('activess')
+ thick.classList.remove('activess')
+}
+thick.onclick=function(){
+lineWidth=10
+thick.classList.add('activess')
+thin.classList.remove('activess')
+}
+//清除所有
+clear.onclick=function(){
+  clear.classList.add('activess')
+  context.clearRect(0,0,canvas.width,canvas.height)
+  setTimeout(() => {
+    clear.classList.remove('activess')
+  },200);
+}
+//保存图片
+download.onclick=function(){
+  download.classList.add('activess')
+  setTimeout(() => {
+    download.classList.remove('activess')
+  },200);
+  var url=canvas.toDataURL("image/png")
+  console.log(url)
+  var a=document.createElement('a')
+  document.body.appendChild(a)
+  a.href=url
+  a.download='保存的图片'
+  a.target='-blank'
+  a.click()
+}
+}
+</script>
+</body>
+</html>
