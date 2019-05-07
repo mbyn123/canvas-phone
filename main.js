@@ -1,43 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-Hans">
-<head>
-  <meta charset="UTF-8">
-  <!--设置画板的尺寸与当前使用的设备一致-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no">
-  <title></title>
-  <script src="//at.alicdn.com/t/font_1178174_2nq9txu82mk.js"></script>
-  
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-	<canvas id="canvas" width=500 height=500>
-	</canvas>
-  <div id="actions">
-      <svg class="active icon" id="pen" >
-          <use xlink:href="#icon-pen1"></use>
-      </svg>
-      <svg class="icon" id="eraser" >
-          <use xlink:href="#icon-eraser1"></use>
-      </svg>
-      <svg class="icon" id="clear" >
-          <use xlink:href="#icon-clear"></use>
-      </svg>
-      <svg class="icon" id="download" >
-          <use xlink:href="#icon-Save"></use>
-      </svg>
-  </div>
-  <ul class="colors">
-    <li id="black" class="black actives"></li>
-    <li id="red" class="red"></li>
-    <li id="green" class="green"></li>
-    <li id="blue" class="blue"></li>
-  </ul>
-  <ul class="sizes">
-    <li id="thin" class="thin activess"></li>
-    <li id="thick" class="thick"></li>
-  </ul>
-  <script>
-  var canvas=document.getElementById('canvas');
+var canvas=document.getElementById('canvas');
 //设置画板大小在显示的屏幕中自适应
   var pageWidth=document.documentElement.clientWidth//获取当前屏幕的显示宽度
   var pageheight=document.documentElement.clientHeight//获取当前屏幕的显示高度
@@ -322,6 +283,3 @@ download.onclick=function(){
   a.click()
 }
 }
-  </script>
-</body>
-</html>
